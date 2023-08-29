@@ -39,18 +39,18 @@ public class OrderController {
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @GetMapping("/byUserId/{userId}")
+    @GetMapping("/userOrders/{userId}")
     public ResponseEntity<List<OrderDto>> getOrdersByUserId(@PathVariable int userId) {
         return new ResponseEntity<>(orderService.getOrdersByUserId(userId), HttpStatus.OK);
     }
 
-    @GetMapping("/orderProducts/{id}")
+    @GetMapping("/products/{id}")
     public ResponseEntity<List<ProductDto>> getOrderProducts(@PathVariable int id) {
         return new ResponseEntity<>(orderService.getOrderProducts(id), HttpStatus.OK);
     }
 
-    @GetMapping("/byDate/{date}")
-    public ResponseEntity<List<OrderDto>> getOrdersByDate(@PathVariable LocalDateTime date) {
+    @GetMapping("/date/{date}")
+    public ResponseEntity<OrderDto> getOrderByDate(@PathVariable LocalDateTime date) {
         return new ResponseEntity<>(orderService.getOrderByDate(date), HttpStatus.OK);
     }
 

@@ -9,7 +9,7 @@ import java.util.List;
 public interface OrderService {
     OrderDto getOrder(int id);
 
-    List<OrderDto> getOrderByDate(LocalDateTime date);
+    OrderDto getOrderByDate(LocalDateTime date);
 
     List<OrderDto> getOrdersByUserId(int id);
 

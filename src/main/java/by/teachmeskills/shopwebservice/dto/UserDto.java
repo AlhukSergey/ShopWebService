@@ -18,34 +18,22 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDto {
-    /* Marker interface for grouping validations to be applied at the time of creating a new user. */
-    public interface UserRegistration {
-    }
-
-    /* Marker interface for grouping validations to be applied at the time of updating user data. */
-    public interface UserUpdate {
-    }
-
-    /* Marker interface for grouping validations to be applied at the time of user login. */
-    public interface UserLogin {
-    }
-
     private int id;
 
-    @NotBlank(message = "Поле должно быть заполнено!", groups = {UserRegistration.class, UserUpdate.class})
-    @Size(min = 3, max = 100, message = "Имя не может содержать меньше 3 и больше 100 символов.", groups = {UserRegistration.class, UserUpdate.class})
+    @NotBlank(message = "Поле должно быть заполнено!")
+    @Size(min = 3, max = 100, message = "Имя не может содержать меньше 3 и больше 100 символов.")
     private String name;
 
-    @NotBlank(message = "Поле должно быть заполнено!", groups = {UserRegistration.class, UserUpdate.class})
-    @Size(min = 3, max = 100, message = "Фамилия не может содержать меньше 3 и больше 100 символов.", groups = {UserRegistration.class, UserUpdate.class})
+    @NotBlank(message = "Поле должно быть заполнено!")
+    @Size(min = 3, max = 100, message = "Фамилия не может содержать меньше 3 и больше 100 символов.")
     private String surname;
 
-    @Past(groups = {UserRegistration.class, UserUpdate.class})
+    @Past
     private LocalDate birthday;
     private double balance;
 
-    @Email(message = "Неверный формат email.", groups = {UserRegistration.class, UserUpdate.class})
-    @NotBlank(message = "Поле должно быть заполнено!", groups = {UserLogin.class, UserRegistration.class, UserUpdate.class})
+    @Email(message = "Неверный формат email.")
+    @NotBlank(message = "Поле должно быть заполнено!")
     private String email;
 
     /*
@@ -59,8 +47,8 @@ public class UserDto {
        */
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$", message = "Неверный формат пароля! " +
             "Длина пароля должна быть не короче 8 символов. Пароль должен содержать как минимум одну цифру," +
-            "одну заглавную букву, одну букву нижнего регистра, один специальный символ.", groups = UserRegistration.class)
-    @NotBlank(message = "Поле должно быть заполнено!", groups = {UserLogin.class, UserRegistration.class})
+            "одну заглавную букву, одну букву нижнего регистра, один специальный символ.")
+    @NotBlank(message = "Поле должно быть заполнено!")
     private String password;
     private List<OrderDto> orders;
 }

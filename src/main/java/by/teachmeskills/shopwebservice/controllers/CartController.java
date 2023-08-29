@@ -1,5 +1,6 @@
 package by.teachmeskills.shopwebservice.controllers;
 
+import by.teachmeskills.shopwebservice.dto.CartDto;
 import by.teachmeskills.shopwebservice.dto.ProductDto;
 import by.teachmeskills.shopwebservice.exceptions.EntityNotFoundException;
 import by.teachmeskills.shopwebservice.services.CartService;
@@ -23,7 +24,7 @@ public class CartController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductDto> addProduct(@RequestBody @Valid ProductDto productDto) {
+    public ResponseEntity<CartDto> addProduct(@RequestBody @Valid ProductDto productDto) {
         return new ResponseEntity<>(cartService.addProductToCart(productDto), HttpStatus.OK);
     }
 

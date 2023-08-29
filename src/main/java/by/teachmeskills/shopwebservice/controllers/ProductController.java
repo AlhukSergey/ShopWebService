@@ -31,7 +31,7 @@ public class ProductController {
         return new ResponseEntity<>(productService.getAllProducts(), HttpStatus.OK);
     }
 
-    @GetMapping("/byCategoryId/{categoryId}")
+    @GetMapping("/categoryProducts/{categoryId}")
     public ResponseEntity<List<ProductDto>> getProductsByCategoryId(@PathVariable int categoryId) {
         return new ResponseEntity<>(productService.getAllProductsByCategoryId(categoryId), HttpStatus.OK);
     }
@@ -42,7 +42,7 @@ public class ProductController {
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @GetMapping("/bySearchParameter/{parameter}")
+    @GetMapping("/search/{parameter}")
     public ResponseEntity<List<ProductDto>> getProductsBySearchParameter(@PathVariable String parameter) {
         return new ResponseEntity<>(productService.getProductsBySearchParameter(parameter), HttpStatus.OK);
     }

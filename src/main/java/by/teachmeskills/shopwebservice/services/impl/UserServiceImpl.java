@@ -30,8 +30,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto getUserByEmailAndPassword(UserDto userDto) throws LoginException {
-        return userConverter.toDto(userRepository.findByEmailAndPassword(userDto.getEmail(), userDto.getPassword()));
+    public UserDto getUserByEmailAndPassword(String email, String password) throws LoginException {
+        return userConverter.toDto(userRepository.findByEmailAndPassword(email, password));
     }
 
     @Override

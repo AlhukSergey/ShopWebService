@@ -17,7 +17,11 @@ import java.util.Optional;
 @Repository
 public class OrderRepositoryImpl implements OrderRepository {
     @PersistenceContext
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
+
+    public OrderRepositoryImpl(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
 
     @Override
     public Order createOrUpdate(Order entity) {
@@ -37,9 +41,9 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public List<Order> findByDate(LocalDateTime date) {
+    public Order findByDate(LocalDateTime date) {
         return entityManager.createQuery("select o from Order o where o.created_at=:created_at", Order.class)
-                .setParameter("created_at", Timestamp.valueOf(date)).getResultList();
+                .setParameter("created_at", Timestamp.valueOf(date)).getSingleResult();
     }
 
     @Override

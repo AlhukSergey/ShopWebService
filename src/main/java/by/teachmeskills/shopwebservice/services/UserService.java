@@ -8,7 +8,7 @@ import java.util.List;
 public interface UserService {
     UserDto getUser(int id);
 
-    UserDto getUserByEmailAndPassword(UserDto userDto) throws LoginException;
+    UserDto getUserByEmailAndPassword(String email, String password) throws LoginException;
 
     UserDto createUser(UserDto userDto);
 
