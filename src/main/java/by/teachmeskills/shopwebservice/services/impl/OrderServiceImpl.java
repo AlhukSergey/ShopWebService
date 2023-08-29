@@ -5,6 +5,7 @@ import by.teachmeskills.shopwebservice.dto.ProductDto;
 import by.teachmeskills.shopwebservice.dto.converters.OrderConverter;
 import by.teachmeskills.shopwebservice.dto.converters.ProductConverter;
 import by.teachmeskills.shopwebservice.entities.Order;
+import by.teachmeskills.shopwebservice.entities.OrderStatus;
 import by.teachmeskills.shopwebservice.repositories.OrderRepository;
 import by.teachmeskills.shopwebservice.services.OrderService;
 import jakarta.persistence.EntityNotFoundException;
@@ -43,6 +44,11 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<OrderDto> getOrdersByUserId(int id) {
         return orderRepository.findByUserId(id).stream().map(orderConverter::toDto).toList();
+    }
+
+    @Override
+    public List<OrderDto> getOrdersByStatus(OrderStatus orderStatus) {
+        return orderRepository.findByStatus(orderStatus).stream().map(orderConverter::toDto).toList();
     }
 
     @Override

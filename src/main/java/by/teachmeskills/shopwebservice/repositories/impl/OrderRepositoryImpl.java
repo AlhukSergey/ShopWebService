@@ -1,6 +1,7 @@
 package by.teachmeskills.shopwebservice.repositories.impl;
 
 import by.teachmeskills.shopwebservice.entities.Order;
+import by.teachmeskills.shopwebservice.entities.OrderStatus;
 import by.teachmeskills.shopwebservice.repositories.OrderRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
@@ -42,7 +43,7 @@ public class OrderRepositoryImpl implements OrderRepository {
 
     @Override
     public Order findByDate(LocalDateTime date) {
-        return entityManager.createQuery("select o from Order o where o.created_at=:created_at", Order.class)
+        return entityManager.createQuery("select o from Order o where o.createdAt=:created_at", Order.class)
                 .setParameter("created_at", Timestamp.valueOf(date)).getSingleResult();
     }
 
@@ -55,5 +56,11 @@ public class OrderRepositoryImpl implements OrderRepository {
     @Override
     public List<Order> findAll() {
         return entityManager.createQuery("select o from Order o ", Order.class).getResultList();
+    }
+
+    @Override
+    public List<Order> findByStatus(OrderStatus orderStatus) {
+        return entityManager.createQuery("select o from Order o where o.orderStatus=:orderStatus", Order.class)
+                .setParameter("orderStatus", orderStatus).getResultList();
     }
 }

@@ -6,6 +6,7 @@ import by.teachmeskills.shopwebservice.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,7 +24,7 @@ public class OrderConverter {
         return Optional.ofNullable(order).map(o -> OrderDto.builder()
                         .id(o.getId())
                         .orderStatus(o.getOrderStatus())
-                        .createdAt(o.getCreatedAt())
+                        .createdAt(o.getCreatedAt().toLocalDateTime())
                         .products(Optional.ofNullable(o.getProducts()).map(products -> products.stream()
                                 .map(productConverter::toDto).toList()).orElse(List.of()))
                         .price(o.getPrice())
@@ -38,7 +39,7 @@ public class OrderConverter {
                         .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователя с id %d не найдено.", orderDto.getUserId()))))
                 .orderStatus(orderDto.getOrderStatus())
                 .price(orderDto.getPrice())
-                .createdAt(orderDto.getCreatedAt())
+                .createdAt(Timestamp.valueOf(orderDto.getCreatedAt()))
                 .build();
     }
 }

@@ -2,6 +2,7 @@ package by.teachmeskills.shopwebservice.controllers;
 
 import by.teachmeskills.shopwebservice.dto.OrderDto;
 import by.teachmeskills.shopwebservice.dto.ProductDto;
+import by.teachmeskills.shopwebservice.entities.OrderStatus;
 import by.teachmeskills.shopwebservice.services.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -42,6 +43,11 @@ public class OrderController {
     @GetMapping("/userOrders/{userId}")
     public ResponseEntity<List<OrderDto>> getOrdersByUserId(@PathVariable int userId) {
         return new ResponseEntity<>(orderService.getOrdersByUserId(userId), HttpStatus.OK);
+    }
+
+    @GetMapping("/orders/{status}")
+    public ResponseEntity<List<OrderDto>> getOrdersByStatus(@PathVariable OrderStatus status) {
+        return new ResponseEntity<>(orderService.getOrdersByStatus(status), HttpStatus.OK);
     }
 
     @GetMapping("/products/{id}")
