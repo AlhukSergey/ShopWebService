@@ -3,6 +3,7 @@ package by.teachmeskills.shopwebservice.controllers;
 import by.teachmeskills.shopwebservice.dto.OrderDto;
 import by.teachmeskills.shopwebservice.dto.ProductDto;
 import by.teachmeskills.shopwebservice.entities.OrderStatus;
+import by.teachmeskills.shopwebservice.exceptions.ExportToFIleException;
 import by.teachmeskills.shopwebservice.services.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -22,7 +23,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -220,5 +223,51 @@ public class OrderController {
     @DeleteMapping("/{id}")
     public void deleteUser(@Parameter(required = true, description = "Order ID") @PathVariable int id) {
         orderService.deleteOrder(id);
+    }
+
+    @Operation(
+            summary = "Import new orders",
+            description = "Add new orders to Shop database from csv file",
+            tags = {"order"}
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "All orders were added",
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = OrderDto.class)))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Orders not added - server error"
+                    )
+            }
+    )
+    @PostMapping("/toBD")
+    public ResponseEntity<List<OrderDto>> uploadOrdersFromFile(@RequestParam("file") MultipartFile file) throws Exception {
+        return new ResponseEntity<>(orderService.saveOrdersFromFile(file), HttpStatus.CREATED);
+    }
+
+    @Operation(
+            summary = "Export all user orders",
+            description = "Export all existed user orders from Shop database  to csv file",
+            tags = {"order"}
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "All user orders were exported",
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = OrderDto.class)))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Orders not exported - server error"
+                    )
+            }
+    )
+    @GetMapping("/toFile/{userId}/{fileName}")
+    public ResponseEntity<String> uploadCategoriesFromBD(@Parameter(required = true, description = "User ID") @PathVariable int userId, @Parameter(required = true, description = "File NAME") @PathVariable String fileName) throws ExportToFIleException {
+        return new ResponseEntity<>(orderService.saveUserOrdersFromBD(userId, fileName), HttpStatus.CREATED);
     }
 }

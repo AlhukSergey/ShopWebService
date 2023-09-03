@@ -1,6 +1,7 @@
 package by.teachmeskills.shopwebservice.controllers;
 
 import by.teachmeskills.shopwebservice.dto.ProductDto;
+import by.teachmeskills.shopwebservice.exceptions.ExportToFIleException;
 import by.teachmeskills.shopwebservice.services.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,7 +21,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -176,5 +179,51 @@ public class ProductController {
     @DeleteMapping("/{id}")
     public void deleteProduct(@Parameter(required = true, description = "Product ID") @PathVariable int id) {
         productService.deleteProduct(id);
+    }
+
+    @Operation(
+            summary = "Import new products",
+            description = "Add new products to Shop database from csv file",
+            tags = {"product"}
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "All products were added",
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = ProductDto.class)))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Products not added - server error"
+                    )
+            }
+    )
+    @PostMapping("/toBD")
+    public ResponseEntity<List<ProductDto>> uploadCategoriesFromFile(@RequestParam("file") MultipartFile file) throws Exception {
+        return new ResponseEntity<>(productService.saveProductsFromFile(file), HttpStatus.CREATED);
+    }
+
+    @Operation(
+            summary = "Export all products",
+            description = "Export all existed products from Shop database  to csv file",
+            tags = {"product"}
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "All products were exported",
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = ProductDto.class)))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Products not exported - server error"
+                    )
+            }
+    )
+    @GetMapping("/toFile/{fileName}")
+    public ResponseEntity<String> uploadProductsFromBD(@Parameter(required = true, description = "File NAME") @PathVariable String fileName) throws ExportToFIleException {
+        return new ResponseEntity<>(productService.saveProductsFromBD(fileName), HttpStatus.CREATED);
     }
 }

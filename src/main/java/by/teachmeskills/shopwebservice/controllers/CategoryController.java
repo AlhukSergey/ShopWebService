@@ -1,6 +1,7 @@
 package by.teachmeskills.shopwebservice.controllers;
 
 import by.teachmeskills.shopwebservice.dto.CategoryDto;
+import by.teachmeskills.shopwebservice.exceptions.ExportToFIleException;
 import by.teachmeskills.shopwebservice.services.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,7 +21,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -137,5 +140,51 @@ public class CategoryController {
     @DeleteMapping("/{id}")
     public void deleteCategory(@Parameter(required = true, description = "Category ID") @PathVariable int id) {
         categoryService.deleteCategory(id);
+    }
+
+    @Operation(
+            summary = "Import new categories",
+            description = "Add new categories to Shop database from csv file",
+            tags = {"category"}
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "All categories were added",
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = CategoryDto.class)))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Categories not added - server error"
+                    )
+            }
+    )
+    @PostMapping("/toBD")
+    public ResponseEntity<List<CategoryDto>> uploadCategoriesFromFile(@RequestParam("file") MultipartFile file) {
+        return new ResponseEntity<>(categoryService.saveCategoriesFromFile(file), HttpStatus.CREATED);
+    }
+
+    @Operation(
+            summary = "Export all categories",
+            description = "Export all existed categories from Shop database  to csv file",
+            tags = {"category"}
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "All categories were exported",
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = CategoryDto.class)))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Categories not exported - server error"
+                    )
+            }
+    )
+    @GetMapping("/toFile/{fileName}")
+    public ResponseEntity<String> uploadCategoriesFromBD(@Parameter(required = true, description = "File NAME") @PathVariable String fileName) throws ExportToFIleException {
+        return new ResponseEntity<>(categoryService.saveCategoriesFromBD(fileName), HttpStatus.CREATED);
     }
 }
