@@ -3,6 +3,7 @@ package by.teachmeskills.shopwebservice.dto.converters;
 import by.teachmeskills.shopwebservice.dto.ProductDto;
 import by.teachmeskills.shopwebservice.entities.Product;
 import by.teachmeskills.shopwebservice.repositories.CategoryRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -39,7 +40,8 @@ public class ProductConverter {
                         .name(pd.getName())
                         .description(pd.getDescription())
                         .price(pd.getPrice())
-                        .category(categoryRepository.findById(pd.getCategoryId()))
+                        .category(Optional.ofNullable(categoryRepository.findById(pd.getCategoryId()))
+                                .orElseThrow(() -> new EntityNotFoundException(String.format("Продукта с id %d не найдено", pd.getCategoryId()))) )
                         .images(Optional.ofNullable(pd.getImages())
                                 .map(images -> images
                                         .stream()
