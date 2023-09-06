@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -160,8 +161,8 @@ public class CategoryController {
                     )
             }
     )
-    @PostMapping("/toBD")
-    public ResponseEntity<List<CategoryDto>> uploadCategoriesFromFile(@RequestParam("file") MultipartFile file) {
+    @PostMapping("/csv/import")
+    public ResponseEntity<List<CategoryDto>> importCategoriesFromCsv(@RequestParam("file") MultipartFile file) {
         return new ResponseEntity<>(categoryService.saveCategoriesFromFile(file), HttpStatus.CREATED);
     }
 
@@ -178,13 +179,13 @@ public class CategoryController {
                             content = @Content(array = @ArraySchema(schema = @Schema(implementation = CategoryDto.class)))
                     ),
                     @ApiResponse(
-                            responseCode = "404",
-                            description = "Categories not exported - server error"
+                            responseCode = "400",
+                            description = "Categories not exported - bad request"
                     )
             }
     )
-    @GetMapping("/toFile/{fileName}")
-    public ResponseEntity<String> uploadCategoriesFromBD(@Parameter(required = true, description = "File NAME") @PathVariable String fileName) throws ExportToFIleException {
-        return new ResponseEntity<>(categoryService.saveCategoriesFromBD(fileName), HttpStatus.CREATED);
+    @GetMapping("/csv/export")
+    public void exportCategoriesToCsv(HttpServletResponse response) throws ExportToFIleException {
+        categoryService.saveCategoriesFromBD(response);
     }
 }

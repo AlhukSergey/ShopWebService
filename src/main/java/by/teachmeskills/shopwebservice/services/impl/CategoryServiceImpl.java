@@ -7,15 +7,19 @@ import by.teachmeskills.shopwebservice.exceptions.ExportToFIleException;
 import by.teachmeskills.shopwebservice.exceptions.ParsingException;
 import by.teachmeskills.shopwebservice.repositories.CategoryRepository;
 import by.teachmeskills.shopwebservice.services.CategoryService;
-import by.teachmeskills.shopwebservice.utils.FileService;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.supercsv.io.CsvBeanWriter;
+import org.supercsv.io.ICsvBeanWriter;
+import org.supercsv.prefs.CsvPreference;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Collections;
@@ -27,12 +31,10 @@ import java.util.Optional;
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryConverter categoryConverter;
-    private final FileService<Category> fileService;
 
-    public CategoryServiceImpl(CategoryRepository categoryRepository, CategoryConverter categoryConverter, FileService<Category> fileService) {
+    public CategoryServiceImpl(CategoryRepository categoryRepository, CategoryConverter categoryConverter) {
         this.categoryRepository = categoryRepository;
         this.categoryConverter = categoryConverter;
-        this.fileService = fileService;
     }
 
     @Override
@@ -83,14 +85,34 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public String saveCategoriesFromBD(String fileName) throws ExportToFIleException {
-        return fileService.writeToFile(fileName, categoryRepository.findAll());
+    public void saveCategoriesFromBD(HttpServletResponse response) throws ExportToFIleException {
+        response.setContentType("text/csv");
+
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=categories.csv";
+        response.setHeader(headerKey, headerValue);
+        response.setCharacterEncoding("UTF-8");
+
+        List<CategoryDto> dtoCategories = categoryRepository.findAll().stream().map(categoryConverter::toDto).toList();
+
+        try (ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE)) {
+            String[] csvHeader = {"Category ID", "Name", "Image path"};
+            String[] nameMapping = {"id", "name", "imagePath"};
+
+            csvWriter.writeHeader(csvHeader);
+
+            for (CategoryDto categoryDto : dtoCategories) {
+                csvWriter.write(categoryDto, nameMapping);
+            }
+        } catch (IOException e) {
+            throw new ExportToFIleException("Во время записи в файл произошла непредвиденная ошибка. Попробуйте позже.");
+        }
     }
 
     private List<CategoryDto> parseCsv(MultipartFile file) {
         if (Optional.ofNullable(file).isPresent()) {
             try (Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
-                CsvToBean<CategoryDto> csvToBean = new CsvToBeanBuilder(reader)
+                CsvToBean<CategoryDto> csvToBean = new CsvToBeanBuilder<CategoryDto>(reader)
                         .withType(CategoryDto.class)
                         .withIgnoreLeadingWhiteSpace(true)
                         .withSeparator(',')
@@ -98,7 +120,7 @@ public class CategoryServiceImpl implements CategoryService {
 
                 return csvToBean.parse();
             } catch (Exception ex) {
-                throw new ParsingException(String.format("Ошибка во время преобразования данных данных: %s", ex.getMessage()));
+                throw new ParsingException(String.format("Ошибка во время преобразования данных: %s", ex.getMessage()));
             }
         }
         return Collections.emptyList();

@@ -10,15 +10,19 @@ import by.teachmeskills.shopwebservice.exceptions.ExportToFIleException;
 import by.teachmeskills.shopwebservice.exceptions.ParsingException;
 import by.teachmeskills.shopwebservice.repositories.OrderRepository;
 import by.teachmeskills.shopwebservice.services.OrderService;
-import by.teachmeskills.shopwebservice.utils.FileService;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.supercsv.io.CsvBeanWriter;
+import org.supercsv.io.ICsvBeanWriter;
+import org.supercsv.prefs.CsvPreference;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.time.LocalDateTime;
@@ -32,13 +36,11 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final OrderConverter orderConverter;
     private final ProductConverter productConverter;
-    private final FileService<Order> fileService;
 
-    public OrderServiceImpl(OrderRepository orderRepository, OrderConverter orderConverter, ProductConverter productConverter, FileService<Order> fileService) {
+    public OrderServiceImpl(OrderRepository orderRepository, OrderConverter orderConverter, ProductConverter productConverter) {
         this.orderRepository = orderRepository;
         this.orderConverter = orderConverter;
         this.productConverter = productConverter;
-        this.fileService = fileService;
     }
 
     @Override
@@ -112,14 +114,34 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public String saveUserOrdersFromBD(int userId, String fileName) throws ExportToFIleException {
-        return fileService.writeToFile(fileName, orderRepository.findByUserId(userId));
+    public void saveUserOrdersFromBD(HttpServletResponse response, int userId) throws ExportToFIleException {
+        response.setContentType("text/csv");
+
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=ordersOfUserWithId" + userId + ".csv";
+        response.setHeader(headerKey, headerValue);
+        response.setCharacterEncoding("UTF-8");
+
+        List<OrderDto> dtoOrders = orderRepository.findByUserId(userId).stream().map(orderConverter::toDto).toList();
+
+        try (ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE)) {
+            String[] csvHeader = {"Order ID", "Order status", "Created at", "Products", "Total price", "User ID"};
+            String[] nameMapping = {"id", "orderStatus", "createdAt", "products", "price", "userId"};
+
+            csvWriter.writeHeader(csvHeader);
+
+            for (OrderDto orderDto : dtoOrders) {
+                csvWriter.write(orderDto, nameMapping);
+            }
+        } catch (IOException e) {
+            throw new ExportToFIleException("Во время записи в файл произошла непредвиденная ошибка. Попробуйте позже.");
+        }
     }
 
     private List<OrderDto> parseCsv(MultipartFile file) {
         if (Optional.ofNullable(file).isPresent()) {
             try (Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
-                CsvToBean<OrderDto> csvToBean = new CsvToBeanBuilder(reader)
+                CsvToBean<OrderDto> csvToBean = new CsvToBeanBuilder<OrderDto>(reader)
                         .withType(OrderDto.class)
                         .withIgnoreLeadingWhiteSpace(true)
                         .withSeparator(',')
@@ -127,7 +149,7 @@ public class OrderServiceImpl implements OrderService {
 
                 return csvToBean.parse();
             } catch (Exception ex) {
-                throw new ParsingException(String.format("Ошибка во время парсинга данных: %s", ex.getMessage()));
+                throw new ParsingException(String.format("Ошибка во время преобразования данных: %s", ex.getMessage()));
             }
         }
         return Collections.emptyList();

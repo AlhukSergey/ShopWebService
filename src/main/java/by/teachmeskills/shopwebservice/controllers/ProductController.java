@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -199,8 +200,8 @@ public class ProductController {
                     )
             }
     )
-    @PostMapping("/toBD")
-    public ResponseEntity<List<ProductDto>> uploadCategoriesFromFile(@RequestParam("file") MultipartFile file) throws Exception {
+    @PostMapping("/csv/import")
+    public ResponseEntity<List<ProductDto>> importProductsFromCsv(@RequestParam("file") MultipartFile file) throws Exception {
         return new ResponseEntity<>(productService.saveProductsFromFile(file), HttpStatus.CREATED);
     }
 
@@ -217,13 +218,13 @@ public class ProductController {
                             content = @Content(array = @ArraySchema(schema = @Schema(implementation = ProductDto.class)))
                     ),
                     @ApiResponse(
-                            responseCode = "404",
-                            description = "Products not exported - server error"
+                            responseCode = "400",
+                            description = "Products not exported - bad request"
                     )
             }
     )
-    @GetMapping("/toFile/{fileName}")
-    public ResponseEntity<String> uploadProductsFromBD(@Parameter(required = true, description = "File NAME") @PathVariable String fileName) throws ExportToFIleException {
-        return new ResponseEntity<>(productService.saveProductsFromBD(fileName), HttpStatus.CREATED);
+    @GetMapping("/csv/export/{categoryId}")
+    public void exportProductsToCsv(HttpServletResponse response, @Parameter(required = true, description = "Category ID") @PathVariable int categoryId) throws ExportToFIleException {
+        productService.saveProductsFromBD(response, categoryId);
     }
 }

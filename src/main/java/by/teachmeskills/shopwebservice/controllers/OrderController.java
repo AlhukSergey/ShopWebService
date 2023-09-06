@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -243,8 +244,8 @@ public class OrderController {
                     )
             }
     )
-    @PostMapping("/toBD")
-    public ResponseEntity<List<OrderDto>> uploadOrdersFromFile(@RequestParam("file") MultipartFile file) throws Exception {
+    @PostMapping("/csv/import")
+    public ResponseEntity<List<OrderDto>> importOrdersFromCsv(@RequestParam("file") MultipartFile file) throws Exception {
         return new ResponseEntity<>(orderService.saveOrdersFromFile(file), HttpStatus.CREATED);
     }
 
@@ -261,13 +262,13 @@ public class OrderController {
                             content = @Content(array = @ArraySchema(schema = @Schema(implementation = OrderDto.class)))
                     ),
                     @ApiResponse(
-                            responseCode = "404",
-                            description = "Orders not exported - server error"
+                            responseCode = "400",
+                            description = "Orders not exported - bad request"
                     )
             }
     )
-    @GetMapping("/toFile/{userId}/{fileName}")
-    public ResponseEntity<String> uploadCategoriesFromBD(@Parameter(required = true, description = "User ID") @PathVariable int userId, @Parameter(required = true, description = "File NAME") @PathVariable String fileName) throws ExportToFIleException {
-        return new ResponseEntity<>(orderService.saveUserOrdersFromBD(userId, fileName), HttpStatus.CREATED);
+    @GetMapping("/csv/export/{userId}")
+    public void exportOrdersToCsv(HttpServletResponse response, @Parameter(required = true, description = "User ID") @PathVariable int userId) throws ExportToFIleException {
+        orderService.saveUserOrdersFromBD(response, userId);
     }
 }

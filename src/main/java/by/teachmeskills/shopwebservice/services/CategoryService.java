@@ -2,6 +2,7 @@ package by.teachmeskills.shopwebservice.services;
 
 import by.teachmeskills.shopwebservice.dto.CategoryDto;
 import by.teachmeskills.shopwebservice.exceptions.ExportToFIleException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -19,5 +20,5 @@ public interface CategoryService {
 
     List<CategoryDto> saveCategoriesFromFile(MultipartFile file);
 
-    String saveCategoriesFromBD(String fileName) throws ExportToFIleException;
+    void saveCategoriesFromBD(HttpServletResponse response) throws ExportToFIleException;
 }

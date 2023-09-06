@@ -4,6 +4,7 @@ import by.teachmeskills.shopwebservice.dto.OrderDto;
 import by.teachmeskills.shopwebservice.dto.ProductDto;
 import by.teachmeskills.shopwebservice.entities.OrderStatus;
 import by.teachmeskills.shopwebservice.exceptions.ExportToFIleException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
@@ -30,5 +31,5 @@ public interface OrderService {
 
     List<OrderDto> saveOrdersFromFile(MultipartFile file) throws Exception;
 
-    String saveUserOrdersFromBD(int userId, String fileName) throws ExportToFIleException;
+    void saveUserOrdersFromBD(HttpServletResponse response, int userId) throws ExportToFIleException;
 }
