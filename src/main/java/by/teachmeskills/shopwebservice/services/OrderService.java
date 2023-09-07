@@ -29,7 +29,7 @@ public interface OrderService {
 
     void deleteOrder(int id);
 
-    List<OrderDto> saveOrdersFromFile(MultipartFile file) throws Exception;
+    List<OrderDto> importOrdersFromCsv(MultipartFile file) throws Exception;
 
-    void saveUserOrdersFromBD(HttpServletResponse response, int userId) throws ExportToFIleException;
+    void exportOrdersToCsv(HttpServletResponse response, int userId) throws ExportToFIleException;
 }

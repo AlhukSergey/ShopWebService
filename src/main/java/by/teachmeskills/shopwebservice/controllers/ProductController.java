@@ -202,7 +202,7 @@ public class ProductController {
     )
     @PostMapping("/csv/import")
     public ResponseEntity<List<ProductDto>> importProductsFromCsv(@RequestParam("file") MultipartFile file) throws Exception {
-        return new ResponseEntity<>(productService.saveProductsFromFile(file), HttpStatus.CREATED);
+        return new ResponseEntity<>(productService.importProductsFromCsv(file), HttpStatus.CREATED);
     }
 
     @Operation(
@@ -225,6 +225,6 @@ public class ProductController {
     )
     @GetMapping("/csv/export/{categoryId}")
     public void exportProductsToCsv(HttpServletResponse response, @Parameter(required = true, description = "Category ID") @PathVariable int categoryId) throws ExportToFIleException {
-        productService.saveProductsFromBD(response, categoryId);
+        productService.exportProductsToCsv(response, categoryId);
     }
 }

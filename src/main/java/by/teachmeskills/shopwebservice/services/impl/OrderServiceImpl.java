@@ -99,7 +99,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderDto> saveOrdersFromFile(MultipartFile file) {
+    public List<OrderDto> importOrdersFromCsv(MultipartFile file) {
         List<OrderDto> csvOrders = parseCsv(file);
         List<Order> orders = Optional.ofNullable(csvOrders)
                 .map(list -> list.stream()
@@ -114,7 +114,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void saveUserOrdersFromBD(HttpServletResponse response, int userId) throws ExportToFIleException {
+    public void exportOrdersToCsv(HttpServletResponse response, int userId) throws ExportToFIleException {
         response.setContentType("text/csv");
 
         String headerKey = "Content-Disposition";

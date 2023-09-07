@@ -163,7 +163,7 @@ public class CategoryController {
     )
     @PostMapping("/csv/import")
     public ResponseEntity<List<CategoryDto>> importCategoriesFromCsv(@RequestParam("file") MultipartFile file) {
-        return new ResponseEntity<>(categoryService.saveCategoriesFromFile(file), HttpStatus.CREATED);
+        return new ResponseEntity<>(categoryService.importCategoriesFromCsv(file), HttpStatus.CREATED);
     }
 
     @Operation(
@@ -186,6 +186,6 @@ public class CategoryController {
     )
     @GetMapping("/csv/export")
     public void exportCategoriesToCsv(HttpServletResponse response) throws ExportToFIleException {
-        categoryService.saveCategoriesFromBD(response);
+        categoryService.exportCategoriesToCsv(response);
     }
 }

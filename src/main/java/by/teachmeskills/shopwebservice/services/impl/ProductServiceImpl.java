@@ -80,7 +80,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductDto> saveProductsFromFile(MultipartFile file) {
+    public List<ProductDto> importProductsFromCsv(MultipartFile file) {
         List<ProductDto> csvProducts = parseCsv(file);
         List<Product> orders = Optional.ofNullable(csvProducts)
                 .map(list -> list.stream()
@@ -95,7 +95,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void saveProductsFromBD(HttpServletResponse response, int categoryId) throws ExportToFIleException {
+    public void exportProductsToCsv(HttpServletResponse response, int categoryId) throws ExportToFIleException {
         response.setContentType("text/csv");
 
         String headerKey = "Content-Disposition";

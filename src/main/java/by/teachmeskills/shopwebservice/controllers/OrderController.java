@@ -246,7 +246,7 @@ public class OrderController {
     )
     @PostMapping("/csv/import")
     public ResponseEntity<List<OrderDto>> importOrdersFromCsv(@RequestParam("file") MultipartFile file) throws Exception {
-        return new ResponseEntity<>(orderService.saveOrdersFromFile(file), HttpStatus.CREATED);
+        return new ResponseEntity<>(orderService.importOrdersFromCsv(file), HttpStatus.CREATED);
     }
 
     @Operation(
@@ -269,6 +269,6 @@ public class OrderController {
     )
     @GetMapping("/csv/export/{userId}")
     public void exportOrdersToCsv(HttpServletResponse response, @Parameter(required = true, description = "User ID") @PathVariable int userId) throws ExportToFIleException {
-        orderService.saveUserOrdersFromBD(response, userId);
+        orderService.exportOrdersToCsv(response, userId);
     }
 }

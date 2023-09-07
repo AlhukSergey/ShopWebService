@@ -22,7 +22,7 @@ public interface ProductService {
 
     void deleteProduct(int id);
 
-    List<ProductDto> saveProductsFromFile(MultipartFile file) throws Exception;
+    List<ProductDto> importProductsFromCsv(MultipartFile file) throws Exception;
 
-    void saveProductsFromBD(HttpServletResponse response, int categoryId) throws ExportToFIleException;
+    void exportProductsToCsv(HttpServletResponse response, int categoryId) throws ExportToFIleException;
 }

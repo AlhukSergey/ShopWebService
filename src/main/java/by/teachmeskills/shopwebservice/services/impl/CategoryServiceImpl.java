@@ -70,7 +70,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryDto> saveCategoriesFromFile(MultipartFile file) {
+    public List<CategoryDto> importCategoriesFromCsv(MultipartFile file) {
         List<CategoryDto> csvCategories = parseCsv(file);
         List<Category> categories = Optional.ofNullable(csvCategories)
                 .map(list -> list.stream()
@@ -85,7 +85,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void saveCategoriesFromBD(HttpServletResponse response) throws ExportToFIleException {
+    public void exportCategoriesToCsv(HttpServletResponse response) throws ExportToFIleException {
         response.setContentType("text/csv");
 
         String headerKey = "Content-Disposition";

@@ -18,7 +18,7 @@ public interface CategoryService {
 
     void deleteCategory(int id);
 
-    List<CategoryDto> saveCategoriesFromFile(MultipartFile file);
+    List<CategoryDto> importCategoriesFromCsv(MultipartFile file);
 
-    void saveCategoriesFromBD(HttpServletResponse response) throws ExportToFIleException;
+    void exportCategoriesToCsv(HttpServletResponse response) throws ExportToFIleException;
 }
