@@ -39,7 +39,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto getCategory(int id) {
-        return categoryConverter.toDto(Optional.ofNullable(categoryRepository.findById(id))
+        return categoryConverter.toDto(categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Категории с id %d не существует.", id))));
     }
 
@@ -51,22 +51,24 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto createCategory(CategoryDto categoryDto) {
         Category category = categoryConverter.fromDto(categoryDto);
-        category = categoryRepository.createOrUpdate(category);
+        category = categoryRepository.save(category);
         return categoryConverter.toDto(category);
     }
 
     @Override
     public CategoryDto updateCategory(CategoryDto categoryDto) {
-        Category category = Optional.ofNullable(categoryRepository.findById(categoryDto.getId()))
+        Category category = categoryRepository.findById(categoryDto.getId())
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Категории с id %d не найдено.", categoryDto.getId())));
         category.setName(categoryDto.getName());
         category.getImage().setImagePath(categoryDto.getImagePath());
-        return categoryConverter.toDto(categoryRepository.createOrUpdate(category));
+        return categoryConverter.toDto(categoryRepository.save(category));
     }
 
     @Override
     public void deleteCategory(int id) {
-        categoryRepository.delete(id);
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Категории с id %d не найдено.", id)));
+        categoryRepository.delete(category);
     }
 
     @Override
@@ -78,7 +80,7 @@ public class CategoryServiceImpl implements CategoryService {
                         .toList())
                 .orElse(null);
         if (Optional.ofNullable(categories).isPresent()) {
-            categories.forEach(categoryRepository::createOrUpdate);
+            categories.forEach(categoryRepository::save);
             return categories.stream().map(categoryConverter::toDto).toList();
         }
         return Collections.emptyList();

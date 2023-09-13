@@ -1,15 +1,9 @@
 package by.teachmeskills.shopwebservice.repositories;
 
 import by.teachmeskills.shopwebservice.entities.Category;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
-public interface CategoryRepository {
-    Category findById(int id);
-
-    List<Category> findAll();
-
-    Category createOrUpdate(Category category);
-
-    void delete(int id);
+@Repository
+public interface CategoryRepository extends JpaRepository<Category, Integer> {
 }

@@ -11,7 +11,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Transactional
 @Service
@@ -26,7 +25,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUser(int id) {
-        return userConverter.toDto(userRepository.findById(id));
+        return userConverter.toDto(userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователя с id %d не найдено.", id))));
     }
 
     @Override
@@ -37,13 +37,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto createUser(UserDto userDto) {
         User user = userConverter.fromDto(userDto);
-        user = userRepository.createOrUpdate(user);
+        user = userRepository.save(user);
         return userConverter.toDto(user);
     }
 
     @Override
     public UserDto updateUser(UserDto userDto) {
-        User user = Optional.ofNullable(userRepository.findById(userDto.getId()))
+        User user = userRepository.findById(userDto.getId())
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователя с id %d не найдено.", userDto.getId())));
         user.setName(userDto.getName());
         user.setSurname(userDto.getSurname());
@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
         user.setEmail(userDto.getEmail());
         user.setBirthday(userDto.getBirthday());
         user.setBalance(userDto.getBalance());
-        return userConverter.toDto(userRepository.createOrUpdate(user));
+        return userConverter.toDto(userRepository.save(user));
     }
 
     @Override
@@ -61,6 +61,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(int id) {
-        userRepository.delete(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователя с id %d не найдено.", id)));
+        userRepository.delete(user);
     }
 }

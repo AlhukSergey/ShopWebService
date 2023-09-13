@@ -1,15 +1,9 @@
 package by.teachmeskills.shopwebservice.repositories;
 
 import by.teachmeskills.shopwebservice.entities.Image;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
-public interface ImageRepository {
-    Image findById(int id);
-
-    List<Image> findAll();
-
-    Image createOrUpdate(Image image);
-
-    void delete(int id);
+@Repository
+public interface ImageRepository extends JpaRepository<Image, Integer> {
 }

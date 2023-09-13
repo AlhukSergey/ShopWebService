@@ -45,13 +45,14 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderDto getOrder(int id) {
-        return orderConverter.toDto(orderRepository.findById(id));
+        return orderConverter.toDto(orderRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Заказа с id %d не найдено.", id))));
     }
 
     @Override
     public OrderDto getOrderByDate(LocalDateTime date) {
-        Order order = Optional.ofNullable(orderRepository.findByDate(date))
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Заказа с id %s не найдено.", date)));
+        Order order = Optional.ofNullable(orderRepository.findByCreatedAt(date))
+                .orElseThrow(() -> new EntityNotFoundException("Заказа не найдено."));
         return orderConverter.toDto(order);
     }
 
@@ -72,30 +73,32 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<ProductDto> getOrderProducts(int id) {
-        Order order = Optional.ofNullable(orderRepository.findById(id))
+        Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Заказа с id %d не найдено.", id)));
         return order.getProducts().stream().map(productConverter::toDto).toList();
     }
 
     @Override
     public OrderDto updateOrder(OrderDto orderDto) {
-        Order order = Optional.ofNullable(orderRepository.findById(orderDto.getId()))
+        Order order = orderRepository.findById(orderDto.getId())
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Заказа с id %d не найдено.", orderDto.getId())));
         order.setOrderStatus(orderDto.getOrderStatus());
         order.setPrice(orderDto.getPrice());
-        return orderConverter.toDto(orderRepository.createOrUpdate(order));
+        return orderConverter.toDto(orderRepository.save(order));
     }
 
     @Override
     public OrderDto createOrder(OrderDto orderDto) {
         Order order = orderConverter.fromDto(orderDto);
-        order = orderRepository.createOrUpdate(order);
+        order = orderRepository.save(order);
         return orderConverter.toDto(order);
     }
 
     @Override
     public void deleteOrder(int id) {
-        orderRepository.delete(id);
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Заказа с id %d не найдено.", id)));
+        orderRepository.delete(order);
     }
 
     @Override
@@ -107,7 +110,7 @@ public class OrderServiceImpl implements OrderService {
                         .toList())
                 .orElse(null);
         if (Optional.ofNullable(orders).isPresent()) {
-            orders.forEach(orderRepository::createOrUpdate);
+            orders.forEach(orderRepository::save);
             return orders.stream().map(orderConverter::toDto).toList();
         }
         return Collections.emptyList();

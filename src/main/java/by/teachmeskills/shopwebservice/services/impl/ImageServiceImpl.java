@@ -10,7 +10,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Transactional
 @Service
@@ -25,7 +24,8 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public ImageDto getImage(int id) {
-        return imageConverter.toDto(imageRepository.findById(id));
+        return imageConverter.toDto(imageRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Изображения с id %d не существует.", id))));
     }
 
     @Override
@@ -36,21 +36,23 @@ public class ImageServiceImpl implements ImageService {
     @Override
     public ImageDto createImage(ImageDto imageDto) {
         Image image = imageConverter.fromDto(imageDto);
-        image = imageRepository.createOrUpdate(image);
+        image = imageRepository.save(image);
         return imageConverter.toDto(image);
     }
 
     @Override
     public ImageDto updateImage(ImageDto imageDto) {
-        Image image = Optional.ofNullable(imageRepository.findById(imageDto.getId()))
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Продукта с id %d не найдено.", imageDto.getId())));
+        Image image = imageRepository.findById(imageDto.getId())
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Изображения с id %d не найдено.", imageDto.getId())));
         image.setImagePath(imageDto.getImagePath());
         image.setPrimary(imageDto.getPrimary());
-        return imageConverter.toDto(imageRepository.createOrUpdate(image));
+        return imageConverter.toDto(imageRepository.save(image));
     }
 
     @Override
     public void deleteImage(int id) {
-        imageRepository.delete(id);
+        Image image = imageRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Изображения с id %d не найдено.", id)));
+        imageRepository.delete(image);
     }
 }
