@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,6 +55,7 @@ public class ImageController {
             }
     )
     @GetMapping("/all")
+    @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<List<ImageDto>> getAllImages() {
         return new ResponseEntity<>(imageService.getAllImages(), HttpStatus.OK);
     }
@@ -74,6 +76,7 @@ public class ImageController {
             )
     })
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<ImageDto> getImageById(@Parameter(required = true, description = "Image ID") @PathVariable int id) {
         return Optional.ofNullable(imageService.getImage(id)).map(dto -> new ResponseEntity<>(dto, HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
@@ -95,6 +98,7 @@ public class ImageController {
             )
     })
     @PostMapping
+    @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<ImageDto> createImage(@RequestBody @Valid ImageDto imageDto) {
         return new ResponseEntity<>(imageService.createImage(imageDto), HttpStatus.CREATED);
     }
@@ -115,6 +119,7 @@ public class ImageController {
             )
     })
     @PutMapping
+    @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<ImageDto> updateImage(@RequestBody @Valid ImageDto imageDto) {
         return new ResponseEntity<>(imageService.updateImage(imageDto), HttpStatus.OK);
     }
@@ -134,6 +139,7 @@ public class ImageController {
             )
     })
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('admin')")
     public void deleteImage(@Parameter(required = true, description = "Image ID") @PathVariable int id) {
         imageService.deleteImage(id);
     }

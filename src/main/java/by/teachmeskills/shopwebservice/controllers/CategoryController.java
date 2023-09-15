@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -100,6 +101,7 @@ public class CategoryController {
             )
     })
     @PostMapping
+    @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<CategoryDto> createCategory(@RequestBody @Valid CategoryDto categoryDto) {
         return new ResponseEntity<>(categoryService.createCategory(categoryDto), HttpStatus.CREATED);
     }
@@ -120,6 +122,7 @@ public class CategoryController {
             )
     })
     @PutMapping
+    @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<CategoryDto> updateCategory(@RequestBody @Valid CategoryDto categoryDto) {
         return new ResponseEntity<>(categoryService.updateCategory(categoryDto), HttpStatus.OK);
     }
@@ -139,6 +142,7 @@ public class CategoryController {
             )
     })
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('admin')")
     public void deleteCategory(@Parameter(required = true, description = "Category ID") @PathVariable int id) {
         categoryService.deleteCategory(id);
     }
@@ -162,6 +166,7 @@ public class CategoryController {
             }
     )
     @PostMapping("/csv/import")
+    @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<List<CategoryDto>> importCategoriesFromCsv(@RequestParam("file") MultipartFile file) {
         return new ResponseEntity<>(categoryService.importCategoriesFromCsv(file), HttpStatus.CREATED);
     }
@@ -185,6 +190,7 @@ public class CategoryController {
             }
     )
     @GetMapping("/csv/export")
+    @PreAuthorize("hasAuthority('admin')")
     public void exportCategoriesToCsv(HttpServletResponse response) throws ExportToFIleException {
         categoryService.exportCategoriesToCsv(response);
     }

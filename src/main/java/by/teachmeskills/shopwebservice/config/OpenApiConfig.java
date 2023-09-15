@@ -1,9 +1,13 @@
 package by.teachmeskills.shopwebservice.config;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 @Configuration
+@OpenAPIDefinition(security = {@SecurityRequirement(name = "Bearer Authentication")})
 public class OpenApiConfig {
 
     /**
@@ -78,7 +83,9 @@ public class OpenApiConfig {
             @Value("${application.dev-server-description}") String devServerDescription,
             @Value("${application.dev-server-address}") String devServerAddress,
             @Value("${application.beta-server-description}") String betaServerDescription,
-            @Value("${application.beta-server-address}") String betaServerAddress) {
+            @Value("${application.beta-server-address}") String betaServerAddress,
+            @Value("${application.security-schema}") String securitySchema
+    ) {
         return new OpenAPI()
                 .info(new Info()
                         .title(appTitle)
@@ -92,7 +99,17 @@ public class OpenApiConfig {
                 .servers(List.of(new Server().url(devServerAddress)
                                 .description(devServerDescription),
                         new Server().url(betaServerAddress)
-                                .description(betaServerDescription)));
+                                .description(betaServerDescription)))
+                .components(new Components()
+                        .addSecuritySchemes(securitySchema, createSecurityScheme()));
+
+    }
+
+    private SecurityScheme createSecurityScheme() {
+        return new SecurityScheme().name("Shop")
+                .type(SecurityScheme.Type.HTTP)
+                .scheme("bearer")
+                .bearerFormat("JWT");
     }
 }
 

@@ -9,13 +9,10 @@ import by.teachmeskills.shopwebservice.repositories.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class CartService {
     private final ProductRepository productRepository;
     private final CartConverter cartConverter;
-
     private final Cart shopCart;
 
     public CartService(ProductRepository productRepository, CartConverter cartConverter, Cart shopCart) {
@@ -25,7 +22,7 @@ public class CartService {
     }
 
     public CartDto addProductToCart(ProductDto productDto) {
-        Product product = Optional.ofNullable(productRepository.findById(productDto.getId()))
+        Product product = productRepository.findById(productDto.getId())
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Продукта с id %d не найдено.", productDto.getId())));
         shopCart.addProduct(product);
         return cartConverter.toDto(shopCart);

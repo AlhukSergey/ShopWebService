@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -139,6 +140,7 @@ public class ProductController {
             )
     })
     @PostMapping
+    @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<ProductDto> createProduct(@RequestBody @Valid ProductDto productDto) {
         return new ResponseEntity<>(productService.createProduct(productDto), HttpStatus.CREATED);
     }
@@ -159,6 +161,7 @@ public class ProductController {
             )
     })
     @PutMapping
+    @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<ProductDto> updateProduct(@RequestBody @Valid ProductDto productDto) {
         return new ResponseEntity<>(productService.updateProduct(productDto), HttpStatus.OK);
     }
@@ -178,6 +181,7 @@ public class ProductController {
             )
     })
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('admin')")
     public void deleteProduct(@Parameter(required = true, description = "Product ID") @PathVariable int id) {
         productService.deleteProduct(id);
     }
@@ -201,6 +205,7 @@ public class ProductController {
             }
     )
     @PostMapping("/csv/import")
+    @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<List<ProductDto>> importProductsFromCsv(@RequestParam("file") MultipartFile file) throws Exception {
         return new ResponseEntity<>(productService.importProductsFromCsv(file), HttpStatus.CREATED);
     }
@@ -224,6 +229,7 @@ public class ProductController {
             }
     )
     @GetMapping("/csv/export/{categoryId}")
+    @PreAuthorize("hasAuthority('admin')")
     public void exportProductsToCsv(HttpServletResponse response, @Parameter(required = true, description = "Category ID") @PathVariable int categoryId) throws ExportToFIleException {
         productService.exportProductsToCsv(response, categoryId);
     }

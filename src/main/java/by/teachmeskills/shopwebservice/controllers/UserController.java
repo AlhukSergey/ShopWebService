@@ -1,7 +1,11 @@
 package by.teachmeskills.shopwebservice.controllers;
 
+import by.teachmeskills.shopwebservice.dto.AuthResponse;
+import by.teachmeskills.shopwebservice.dto.RefreshJwtTokenDto;
+import by.teachmeskills.shopwebservice.dto.UserCredentialsRequest;
 import by.teachmeskills.shopwebservice.dto.UserDto;
 import by.teachmeskills.shopwebservice.exceptions.LoginException;
+import by.teachmeskills.shopwebservice.services.AuthService;
 import by.teachmeskills.shopwebservice.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -11,9 +15,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.security.auth.message.AuthException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,9 +37,11 @@ import java.util.Optional;
 @RequestMapping("/user")
 public class UserController {
     private final UserService userService;
+    private final AuthService authService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, AuthService authService) {
         this.userService = userService;
+        this.authService = authService;
     }
 
     @Operation(
@@ -55,6 +63,7 @@ public class UserController {
             }
     )
     @GetMapping("/all")
+    @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<List<UserDto>> getAllUsers() {
         return new ResponseEntity<>(userService.getAll(), HttpStatus.OK);
     }
@@ -75,6 +84,7 @@ public class UserController {
             )
     })
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<UserDto> getUserById(@Parameter(required = true, description = "User ID") @PathVariable int id) {
         return Optional.ofNullable(userService.getUser(id)).map(dto -> new ResponseEntity<>(dto, HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
@@ -100,6 +110,65 @@ public class UserController {
                                          @Parameter(required = true, description = "Password") @PathVariable String password) throws LoginException {
         return Optional.ofNullable(userService.getUserByEmailAndPassword(email, password)).map(dto -> new ResponseEntity<>(dto, HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.UNAUTHORIZED));
+    }
+
+    @Operation(
+            summary = "Authenticate user",
+            description = "Login user and get access token",
+            tags = {"user"})
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Token is returned, user logged in"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "User not logged in",
+                    content = @Content
+            )
+    })
+    @PostMapping("/login")
+    public AuthResponse auth(@RequestBody @Valid UserCredentialsRequest request) throws AuthException {
+        return authService.login(request);
+    }
+
+    @Operation(
+            summary = "Access token",
+            description = "Get new access token by refresh token")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Token is returned, user logged in"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "User not logged in",
+                    content = @Content
+            )
+    })
+    @PostMapping("/token")
+    public AuthResponse getNewAccessToken(@RequestBody @Valid RefreshJwtTokenDto refreshTokenRequest) {
+        return authService.getAccessToken(refreshTokenRequest);
+    }
+
+    @Operation(
+            summary = "Refresh security token",
+            description = "Get new access token",
+            tags = {"user"})
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Token is returned, access token updated"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Token isn't returned.",
+                    content = @Content
+            )
+    })
+    @PostMapping("/refreshToken")
+    public AuthResponse refreshToken(@RequestBody @Valid RefreshJwtTokenDto refreshTokenRequest) throws AuthException {
+        return authService.getRefreshToken(refreshTokenRequest);
     }
 
     @Operation(
@@ -159,5 +228,25 @@ public class UserController {
     @DeleteMapping("/{id}")
     public void deleteUser(@Parameter(required = true, description = "User ID") @PathVariable int id) {
         userService.deleteUser(id);
+    }
+
+    @Operation(
+            summary = "Set or update user role",
+            description = "Set or update user role",
+            tags = {"role"})
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Role updated"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Role not updated - server error",
+                    content = @Content
+            )
+    })
+    @PostMapping("/updateRole")
+    public ResponseEntity<UserDto> updateUserRole(@RequestBody @Valid UserDto userDto) {
+        return new ResponseEntity<>(userService.updateUserRole(userDto), HttpStatus.OK);
     }
 }

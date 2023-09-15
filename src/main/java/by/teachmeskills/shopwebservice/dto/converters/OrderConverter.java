@@ -35,7 +35,7 @@ public class OrderConverter {
 
     public Order fromDto(OrderDto orderDto) {
         return Order.builder()
-                .user(Optional.ofNullable(userRepository.findById(orderDto.getUserId()))
+                .user(userRepository.findById(orderDto.getUserId())
                         .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователя с id %d не найдено.", orderDto.getUserId()))))
                 .orderStatus(orderDto.getOrderStatus())
                 .price(orderDto.getPrice())
