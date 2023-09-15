@@ -1,4 +1,3 @@
-/*
 package by.teachmeskills.shopwebservice.utils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +13,8 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 public class LogAspect {
-    @Pointcut(value = "execution(public * by.teachmeskills.shopwebservice..*(..))")
+    @Pointcut(value = "execution(public * by.teachmeskills.shopwebservice..*(..))  " +
+            "&& !within(by.teachmeskills.shopwebservice.config..*)")
     public void loggingOperation() {
     }
 
@@ -55,4 +55,3 @@ public class LogAspect {
                 + exception + ".");
     }
 }
-*/
